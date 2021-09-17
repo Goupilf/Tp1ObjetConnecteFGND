@@ -6,7 +6,6 @@
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <PMS.h>   
-#include "PMS.h"
 
 PMS pms(Serial2); //  R32 : IO16
 PMS::DATA data;
@@ -146,11 +145,24 @@ void loop(void) {
       Serial.print("PM 2.5 (ug/m3): ");
       Serial.println(data.PM_AE_UG_2_5);
       Serial.println();
-      
-
+      if(data.PM_AE_UG_2_5 <= 11){
+        ledcWrite(1, 0);
+        ledcWrite(2, 255); //GREEN
+        ledcWrite(3, 0);
+      } else if(data.PM_AE_UG_2_5 <= 34){
+        ledcWrite(1, 255); 
+        ledcWrite(2, 130); //YELLOW
+        ledcWrite(3, 0);
+      } else if(data.PM_AE_UG_2_5 <= 54){
+        ledcWrite(1, 255);
+        ledcWrite(2, 90); //Orange
+        ledcWrite(3, 0); 
+      } else{
+        ledcWrite(1, 255);
+        ledcWrite(2, 0); //RED
+        ledcWrite(3, 0);
+      }
     }
-  
-  ledcWrite(3, 255); //Control the RGB led
 }
 
 
