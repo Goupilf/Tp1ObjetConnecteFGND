@@ -5,6 +5,12 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+#include <PMS.h>   
+#include "PMS.h"
+
+PMS pms(Serial2); //  R32 : IO16
+PMS::DATA data;
+
 
 const char* ssid = "WIN-EIONVRPGBH2 1385";
 const char* password = "{817mX63";
@@ -12,6 +18,7 @@ const char* password = "{817mX63";
 WebServer server(80);
 
 const int led = 13;
+int pm2p5value = 0;
 
 void handleADC(){
   int a = analogRead(A0);
@@ -69,8 +76,10 @@ void handleWebRequests(){
 
 void setup(void) {
   delay(1000);
-  Serial.begin(115200);
-  Serial.println();
+  Serial.begin(9600);  // Moniteur série pour l’affichage (println)
+  Serial2.begin(9600); // Port de communication série avec le capteur PMS 
+  delay(2000);
+
 
   //Initialize File System
   SPIFFS.begin();
@@ -104,6 +113,18 @@ void setup(void) {
 void loop(void) {
   server.handleClient();
   delay(2);//allow the cpu to switch to other tasks
+  
+    if (pms.read(data))
+    {
+      delay(5000);
+      pm2p5value = data.PM_AE_UG_2_5;
+      Serial.print("PM 2.5 (ug/m3): ");
+      Serial.println(data.PM_AE_UG_2_5);
+      Serial.println();
+      
+
+    }
+  
 }
 
 
