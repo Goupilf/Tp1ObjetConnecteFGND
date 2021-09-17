@@ -39,12 +39,17 @@ void handleADC(){
   a = map(a,0,1023,0,100);
   String adc = String(a);
   Serial.println(adc);
-  server.send(200, "text/plane",adc);
+  server.send(200, "text/plain",adc);
+}
+void readPMS(){
+  String pm2p5asString = String(pm2p5value);
+  // Serial.println(pm2p5asString);
+  server.send(200,"text/plain", pm2p5asString);
 }
 
 void handleRoot() {
   server.sendHeader("Location", "/index.html",true);   //Redirect to our html web page
-  server.send(302, "text/plane","");
+  server.send(302, "text/plain","");
 }
 bool loadFromSpiffs(String path) {
   String dataType = "text/plain";
@@ -131,6 +136,7 @@ void setup(void) {
   //Initialize Webserver
   server.on("/",handleRoot);
   server.on("/getADC",handleADC); //Reads ADC function is called from out index.html
+  server.on("/readPMS",readPMS);
   server.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI
   server.begin();
 }
