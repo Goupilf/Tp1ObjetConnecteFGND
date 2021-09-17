@@ -11,9 +11,23 @@
 PMS pms(Serial2); //  R32 : IO16
 PMS::DATA data;
 
+#include <config.h>
 
-const char* ssid = "WIN-EIONVRPGBH2 1385";
-const char* password = "{817mX63";
+//Configuration for RGB led
+uint8_t ledR = 12;  
+uint8_t ledG = 13;
+uint8_t ledB = 14; 
+
+uint8_t ledArray[3] = {1, 2, 3}; 
+const boolean invert = true;     // set true if common anode, false if common cathode
+
+uint8_t color = 0;          // a value from 0 to 255 representing the hue
+uint32_t R, G, B;           // the Red Green and Blue color components
+uint8_t brightness = 255;
+
+//See configuration.h file
+const char* ssid = "SSID";
+const char* password = "PASSWORD";
 
 WebServer server(80);
 
@@ -81,6 +95,17 @@ void setup(void) {
   delay(2000);
 
 
+  //Set up led
+  ledcAttachPin(ledR, 1); // assign RGB led pins to channels
+  ledcAttachPin(ledG, 2);
+  ledcAttachPin(ledB, 3);
+  // Initialize channels 
+  // channels 0-15, resolution 1-16 bits, freq limits depend on resolution
+  // ledcSetup(uint8_t channel, uint32_t freq, uint8_t resolution_bits);
+  ledcSetup(1, 12000, 8); // 12 kHz PWM, 8-bit resolution
+  ledcSetup(2, 12000, 8);
+  ledcSetup(3, 12000, 8);
+
   //Initialize File System
   SPIFFS.begin();
   Serial.println("File System Initialized");
@@ -125,6 +150,7 @@ void loop(void) {
 
     }
   
+  ledcWrite(3, 255); //Control the RGB led
 }
 
 
