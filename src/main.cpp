@@ -26,8 +26,8 @@ uint32_t R, G, B;           // the Red Green and Blue color components
 uint8_t brightness = 255;
 
 //See configuration.h file
-const char* ssid = "SSID";
-const char* password = "PASSWORD";
+const char* ssid = SSID;
+const char* password = PASSWORD;
 
 WebServer server(80);
 
