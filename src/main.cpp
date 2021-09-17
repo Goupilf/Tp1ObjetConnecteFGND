@@ -5,7 +5,9 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
-#include <PMS.h>   
+#include <PMS.h>
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
 
 PMS pms(Serial2); //  R32 : IO16
 PMS::DATA data;
