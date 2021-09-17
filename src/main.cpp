@@ -5,9 +5,11 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+#include <configuration.h>
 
-const char* ssid = "WIN-EIONVRPGBH2 1385";
-const char* password = "{817mX63";
+//Voir fichier configuration.h
+const char* ssid = SSID;
+const char* password = PASSWORD;
 
 WebServer server(80);
 
