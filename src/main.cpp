@@ -35,6 +35,12 @@ WebServer server(80);
 const int led = 13;
 int pm2p5value = 0;
 
+//DHT variable
+#define DHTPIN 25
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
+
+
 void handleADC(){
   int a = analogRead(A0);
   a = map(a,0,1023,0,100);
@@ -98,6 +104,7 @@ void setup(void) {
   delay(1000);
   Serial.begin(9600);  // Moniteur série pour l’affichage (println)
   Serial2.begin(9600); // Port de communication série avec le capteur PMS 
+  Serial1.begin(9600);
   delay(2000);
 
 
@@ -116,6 +123,8 @@ void setup(void) {
   SPIFFS.begin();
   Serial.println("File System Initialized");
 
+  dht.begin();
+  Serial.println("DHT initialized");
   
   //Connect to wifi Network
   WiFi.begin(ssid, password);     //Connect to your WiFi router
@@ -152,7 +161,12 @@ void loop(void) {
       pm2p5value = data.PM_AE_UG_2_5;
       Serial.print("PM 2.5 (ug/m3): ");
       Serial.println(data.PM_AE_UG_2_5);
-      Serial.println();
+      float h = dht.readHumidity();
+      Serial.println("Humidity:");
+      Serial.println(h);
+      float t = dht.readTemperature();
+      Serial.println("Temperature:");
+      Serial.println(t);
       if(data.PM_AE_UG_2_5 <= 11){
         ledcWrite(1, 0);
         ledcWrite(2, 255); //GREEN

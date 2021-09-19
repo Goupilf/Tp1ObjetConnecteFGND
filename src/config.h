@@ -1,2 +1,2 @@
-const char* SSID ="WIN-EIONVRPGBH2 1385";
-const char* PASSWORD ="{817mX63";
+const char* SSID ="LAPTOP-2L8NLPNQ 4641";
+const char* PASSWORD ="4[Y8892g";
