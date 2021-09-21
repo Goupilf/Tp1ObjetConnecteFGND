@@ -41,9 +41,13 @@ int pm2p5value = 0;
 #define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
 
-//waitFiveMins variables
-unsigned long previousMillis = 0; 
-const long interval = 18000;
+//waitThreeMins variables
+unsigned long previousMillis1 = 0; 
+const long interval1 = 180000;
+
+//waitFiveSeconds variables
+unsigned long previousMillis2 = 0; 
+const long interval2 = 5000;
 
 //API variable
 const char* API_URL = "https://staging.revolvair.org/api/revolvair/stations/nicolasfelix/measures";
@@ -186,37 +190,40 @@ void loop(void) {
   delay(2);//allow the cpu to switch to other tasks
     if (pms.read(data))
     {
-      delay(5000);
-      pm2p5value = data.PM_AE_UG_2_5;
-      Serial.print("PM 2.5 (ug/m3): ");
-      Serial.println(data.PM_AE_UG_2_5);
-      float h = dht.readHumidity();
-      Serial.println("Humidity:");
-      Serial.println(h);
-      float t = dht.readTemperature();
-      Serial.println("Temperature:");
-      Serial.println(t);
-      if(data.PM_AE_UG_2_5 <= 11){
-        ledcWrite(1, 0);
-        ledcWrite(2, 255); //GREEN
-        ledcWrite(3, 0);
-      } else if(data.PM_AE_UG_2_5 <= 34){
-        ledcWrite(1, 255); 
-        ledcWrite(2, 130); //YELLOW
-        ledcWrite(3, 0);
-      } else if(data.PM_AE_UG_2_5 <= 54){
-        ledcWrite(1, 255);
-        ledcWrite(2, 90); //Orange
-        ledcWrite(3, 0); 
-      } else{
-        ledcWrite(1, 255);
-        ledcWrite(2, 0); //RED
-        ledcWrite(3, 0);
+      unsigned long currentMillis2 = millis();
+      if (currentMillis2 - previousMillis2 >= interval2) {
+        previousMillis2 = currentMillis2;
+        pm2p5value = data.PM_AE_UG_2_5;
+        Serial.print("PM 2.5 (ug/m3): ");
+        Serial.println(data.PM_AE_UG_2_5);
+        float h = dht.readHumidity();
+        Serial.println("Humidity:");
+        Serial.println(h);
+        float t = dht.readTemperature();
+        Serial.println("Temperature:");
+        Serial.println(t);
+        if(data.PM_AE_UG_2_5 <= 11){
+          ledcWrite(1, 0);
+          ledcWrite(2, 255); //GREEN
+          ledcWrite(3, 0);
+        } else if(data.PM_AE_UG_2_5 <= 34){
+          ledcWrite(1, 255); 
+          ledcWrite(2, 130); //YELLOW
+          ledcWrite(3, 0);
+        } else if(data.PM_AE_UG_2_5 <= 54){
+          ledcWrite(1, 255);
+          ledcWrite(2, 90); //Orange
+          ledcWrite(3, 0); 
+        } else{
+          ledcWrite(1, 255);
+          ledcWrite(2, 0); //RED
+          ledcWrite(3, 0);
+        }
       }
     }
-  unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;
+  unsigned long currentMillis1 = millis();
+  if (currentMillis1 - previousMillis1 >= interval1) {
+    previousMillis1 = currentMillis1;
     sendPM25ValueToAPI();
   }
 }
