@@ -43,7 +43,7 @@ DHT dht(DHTPIN, DHTTYPE);
 
 //waitFiveMins variables
 unsigned long previousMillis = 0; 
-const long interval = 300000;
+const long interval = 18000;
 
 //API variable
 const char* API_URL = "https://staging.revolvair.org/api/revolvair/stations/nicolasfelix/measures";
