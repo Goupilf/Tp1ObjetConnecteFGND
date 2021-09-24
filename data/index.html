@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+ <meta charset='UTF-8'>
  <title>Données PM25 - RevolvAir.org</title>
  <link rel="stylesheet" href="style.css">
  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
@@ -12,21 +13,36 @@
 <ul class="menu">
  <li><a href="/">Home</a></li>
  <li><a href="/">LED</a></li>
+ <li><a href="/wifiPage">WiFi</a></li>
  <li><a href="/graph">Graph</a></li>
  <li><a href="/pm25value">Value</a></li>
+ <li><a href="/tempPage">Temperature</a></li>
 </ul>
 </div>
 <h2>Current value</h2>
 <h2>PM2.5 realtime value (ug/m<sup>3</sup>)</h2>
-<div id="PMSValue" width="400" height="100"></div>
+<div id="PMSValue" width="400" heightx`"></div>
+<div id="Description"></div>
 <script>
 setInterval(function() { getData(); }, 2000);
 function getData() {
  var xhttp = new XMLHttpRequest();
  xhttp.onreadystatechange = function() {
  if (this.readyState == 4 && this.status == 200) {
- //RevolvAir.org
  document.getElementById("PMSValue").innerHTML = this.responseText;
+ if (this.responseText <= 11) {
+     document.getElementById("Description").innerHTML = "La qualité de l’air est considérée comme satisfaisante et la pollution de l’air pose peu ou pas de risque.";
+ }
+ else if (this.responseText > 11 && this.responseText <= 34) {
+     document.getElementById("Description").innerHTML = "La qualité de l’air est acceptable; cependant, pour certains polluants, il peut y avoir un problème de santé modéré pour un très petit nombre de personnes qui sont inhabituellement sensibles à la pollution atmosphérique.";
+ }
+ else if (this.responseText > 34 && this.responseText <= 54) {
+     document.getElementById("Description").innerHTML = "Les membres de groupes sensibles peuvent subir des effets sur la santé. Le grand public ne sera probablement pas affecté.";
+ }
+ else if (this.responseText > 54) {
+     document.getElementById("Description").innerHTML = "Tout le monde peut commencer à ressentir des effets sur la santé; les membres de groupes sensibles peuvent subir des effets plus graves sur la santé.";
+ }
+ 
  }
  };
  xhttp.open("GET", "readPMS", true);

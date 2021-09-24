@@ -11,6 +11,30 @@ body{background-color: #e2e2e2; font-family: sans-serif; }
  border-width: thick;
  background-color: white;
 }
+#TempVal {
+    border-color: #e91e63;
+    border-style: solid;
+    max-width: 20%;
+    text-align: center;
+    font-size: 2em;
+    border-radius: 5px;
+    padding: 1em;
+    margin: 1em;
+    border-width: thick;
+    background-color: white;
+   }
+#HumVal {
+    border-color: #e91e63;
+    border-style: solid;
+    max-width: 20%;
+    text-align: center;
+    font-size: 2em;
+    border-radius: 5px;
+    padding: 1em;
+    margin: 1em;
+    border-width: thick;
+    background-color: white;
+   }
 .menu {
  list-style-type: none;
  margin: 0;

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset='UTF-8'>
+ <title>Données Humidité et Température - RevolvAir.org</title>
+ <link rel="stylesheet" href="style.css">
+ <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+</head>
+<body>
+<h1>RevolvAir.org</h1>
+<h3>The air your breath</h3>
+<div>
+<ul class="menu">
+ <li><a href="/">Home</a></li>
+ <li><a href="/">LED</a></li>
+ <li><a href="/wifiPage">WiFi</a></li>
+ <li><a href="/graph">Graph</a></li>
+ <li><a href="/pm25value">Value</a></li>
+ <li><a href="/tempPage">Temperature</a></li>
+</ul>
+</div>
+<h2>Current value</h2>
+<h2>Temp realtime value (Celsius)</h2>
+<div id="TempVal" width="400" height="60"></div>
+<h2>Hum realtime value %</h2>
+<div id="HumVal" width="400" height="60"></div>
+<script>
+setInterval(function() { getData(); }, 2000);
+function getData() {
+ var xhttp = new XMLHttpRequest();
+ xhttp.onreadystatechange = function() {
+ if (this.readyState == 4 && this.status == 200) {
+ var responseText = this.responseText;
+ var index = responseText.indexOf(",");
+ var temp =responseText.substr(0,index);
+ var hum =responseText.substr(index + 1);
+ document.getElementById("TempVal").innerHTML = temp;
+ document.getElementById("HumVal").innerHTML = hum;
+ }
+ };
+ xhttp.open("GET", "readTemp", true);
+ xhttp.send();
+}
+</script>
+
+<div class="footer">
+ <a href="https://revolvair.org">RevolvAir.org</a>
+</div>
+</body>
+</html>

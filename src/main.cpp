@@ -8,6 +8,7 @@
 #include <PMS.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
+#include <../lib/src/TempReader.cpp>
 
 PMS pms(Serial2); //  R32 : IO16
 PMS::DATA data;
@@ -40,7 +41,23 @@ int pm2p5value = 0;
 #define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
 
-
+void handleTemp() {
+  server.sendHeader("Location", "/TempData.html",true);   //Redirect to our html web page
+  server.send(302, "text/plain","");
+}
+void handleWifi() {
+  server.sendHeader("Location", "/WifiData.html",true);   //Redirect to our html web page
+  server.send(302, "text/plain","");
+}
+void readTemp() {
+  String temp = String( dht.readTemperature());
+  String hum = String( dht.readHumidity());
+  server.send(200, "text/plain",temp + "," + hum );// trouver dans tempData.html facon de separer pour afficher correctement
+}
+void readWifi() {
+  String SSID = ssid;
+  server.send(200, "text/plain",SSID );// 
+}
 void handleADC(){
   int a = analogRead(A0);
   a = map(a,0,1023,0,100);
@@ -146,7 +163,12 @@ void setup(void) {
   //Initialize Webserver
   server.on("/",handleRoot);
   server.on("/getADC",handleADC); //Reads ADC function is called from out index.html
+  server.on("/tempPage",handleTemp);
+  server.on("/wifiPage",handleWifi);
   server.on("/readPMS",readPMS);
+  server.on("/readTemp",readTemp);
+  server.on("/readWifi",readWifi);
+
   server.onNotFound(handleWebRequests); //Set setver all paths are not found so we can handle as per URI
   server.begin();
 }
