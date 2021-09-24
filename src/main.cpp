@@ -8,12 +8,12 @@
 #include <PMS.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
-#include <../lib/src/TempReader.cpp>
-
+#include <../lib/TempReader/TempReader.cpp>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include <config.h>
 PMS pms(Serial2); //  R32 : IO16
 PMS::DATA data;
-
-#include <config.h>
 
 //Configuration for RGB led
 uint8_t ledR = 12;  
@@ -58,6 +58,20 @@ void readWifi() {
   String SSID = ssid;
   server.send(200, "text/plain",SSID );// 
 }
+
+//waitThreeMins variables
+unsigned long previousMillis1 = 0; 
+const long interval1 = 180000;
+
+//waitFiveSeconds variables
+unsigned long previousMillis2 = 0; 
+const long interval2 = 5000;
+
+//API variable
+const char* API_URL = "https://staging.revolvair.org/api/revolvair/stations/nicolasfelix/measures";
+const char* API_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiZGEyZTg0ZGVlYzAwZGM5MTA2ODMxMzY1OTM3YjgxOWMzNjliOGNjYTg5NTQ4NjlmMTQ3ZWI2MTllZGU0ZGI5MTcwMGIzMTI2NzZlNzRhZWQiLCJpYXQiOjE2MzIyNDgyNTIsIm5iZiI6MTYzMjI0ODI1MiwiZXhwIjoxNjYzNzg0MjUyLCJzdWIiOiIzNSIsInNjb3BlcyI6W119.HGqZ5HdAaFHq_GDdC4kzkwDURbc6KgFWxWIkrNI8gWExh_3JiwHvo2y8YI-kFbPWd_SS3luBOTY25kma6-ZHow3OeiH4RKPOKRHw1ZLf1tPscQfVU50og02oaDkkZlUwqS2MmpxbIgW5DAa_E6GiNGX6mfcLnT0Ehvngc6IfZcqrynrTkSRIUsMdgTGxLzqhxnNhxl9YCsm9KSvAws4uRGgKYt5lz48Rha1nl34mV-a3h8H2lMEkcYrgp0w5i-mqV1jxLTLUAJZJx_VpQEbHUHHya_MUMTZvizCKUR0wYnanzTLqdDRm8Pc9EQOyIcOB6La8GJvW-eTnZ7cN5_K3iTAX9OoWw1JNN2U78J5BWmHkoG0A3ekJ-A6tnWE7EeMXfeEhneOD7FlHrZeHmq5G8q4qFHQ6MgmmdrzcT5_Ufy6-AOcVOowDy6JieZeCze0IbB8dRenMDXDA9BCS6oj7BdKarzrDtPqyW1O9sPOYoyirloWskTAfvOQjWMUP_GEdw6hm5QOXBPOWdk6Ut__l5yJ1JhXtr1Iazoq6UkuJ69_mAmaqb52-bxX0E0r4DcGyqSEEA_DUHJdsXNniwmofMc9Vyl0ygvEJUzAuhPZV159cihKPIVcC13t32PzIYUsWo7LknUQnu6j8pKgo8AR7JHN5X1T5NhJo0e5ECWCWvA8";
+
+
 void handleADC(){
   int a = analogRead(A0);
   a = map(a,0,1023,0,100);
@@ -115,6 +129,28 @@ void handleWebRequests(){
   }
   server.send(404, "text/plain", message);
   Serial.println(message);
+}
+
+void postJSON(String& encodedJSON) {
+    HTTPClient http;
+    http.begin(API_URL);
+    http.addHeader("Accept", "application/json");
+    http.addHeader("Content-Type", "application/json");
+    http.addHeader("Authorization", "Bearer " + String(API_TOKEN));
+    int httpCode = http.POST(encodedJSON);
+    String payload = http.getString();
+    Serial.println(httpCode);
+    Serial.println(payload);
+    http.end();
+}
+
+void sendPM25ValueToAPI(){
+  DynamicJsonDocument doc(1024);
+  doc["value"]  = pm2p5value;
+  doc["unit"]   = "pm25_raw";
+  String jsonPm25Package = "";
+  serializeJson(doc, jsonPm25Package);
+  postJSON(jsonPm25Package);  
 }
 
 void setup(void) {
@@ -176,37 +212,44 @@ void setup(void) {
 void loop(void) {
   server.handleClient();
   delay(2);//allow the cpu to switch to other tasks
-  
     if (pms.read(data))
     {
-      delay(5000);
-      pm2p5value = data.PM_AE_UG_2_5;
-      Serial.print("PM 2.5 (ug/m3): ");
-      Serial.println(data.PM_AE_UG_2_5);
-      float h = dht.readHumidity();
-      Serial.println("Humidity:");
-      Serial.println(h);
-      float t = dht.readTemperature();
-      Serial.println("Temperature:");
-      Serial.println(t);
-      if(data.PM_AE_UG_2_5 <= 11){
-        ledcWrite(1, 0);
-        ledcWrite(2, 255); //GREEN
-        ledcWrite(3, 0);
-      } else if(data.PM_AE_UG_2_5 <= 34){
-        ledcWrite(1, 255); 
-        ledcWrite(2, 130); //YELLOW
-        ledcWrite(3, 0);
-      } else if(data.PM_AE_UG_2_5 <= 54){
-        ledcWrite(1, 255);
-        ledcWrite(2, 90); //Orange
-        ledcWrite(3, 0); 
-      } else{
-        ledcWrite(1, 255);
-        ledcWrite(2, 0); //RED
-        ledcWrite(3, 0);
+      unsigned long currentMillis2 = millis();
+      if (currentMillis2 - previousMillis2 >= interval2) {
+        previousMillis2 = currentMillis2;
+        pm2p5value = data.PM_AE_UG_2_5;
+        Serial.print("PM 2.5 (ug/m3): ");
+        Serial.println(data.PM_AE_UG_2_5);
+        float h = dht.readHumidity();
+        Serial.println("Humidity:");
+        Serial.println(h);
+        float t = dht.readTemperature();
+        Serial.println("Temperature:");
+        Serial.println(t);
+        if(data.PM_AE_UG_2_5 <= 11){
+          ledcWrite(1, 0);
+          ledcWrite(2, 255); //GREEN
+          ledcWrite(3, 0);
+        } else if(data.PM_AE_UG_2_5 <= 34){
+          ledcWrite(1, 255); 
+          ledcWrite(2, 130); //YELLOW
+          ledcWrite(3, 0);
+        } else if(data.PM_AE_UG_2_5 <= 54){
+          ledcWrite(1, 255);
+          ledcWrite(2, 90); //Orange
+          ledcWrite(3, 0); 
+        } else{
+          ledcWrite(1, 255);
+          ledcWrite(2, 0); //RED
+          ledcWrite(3, 0);
+        }
       }
     }
+  unsigned long currentMillis1 = millis();
+  if (currentMillis1 - previousMillis1 >= interval1) {
+    previousMillis1 = currentMillis1;
+    sendPM25ValueToAPI();
+  }
 }
 
 
