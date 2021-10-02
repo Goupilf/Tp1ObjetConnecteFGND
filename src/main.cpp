@@ -8,7 +8,7 @@
 #include <PMS.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
-#include <../lib/TempReader/TempReader.cpp>
+#include <../lib/TempReader/TempReader.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <config.h>
@@ -28,8 +28,6 @@ uint32_t R, G, B;           // the Red Green and Blue color components
 uint8_t brightness = 255;
 
 //See configuration.h file
-const char* ssid = SSID;
-const char* password = PASSWORD;
 
 WebServer server(80);
 
@@ -55,7 +53,7 @@ void readTemp() {
   server.send(200, "text/plain",temp + "," + hum );// trouver dans tempData.html facon de separer pour afficher correctement
 }
 void readWifi() {
-  String SSID = ssid;
+  
   server.send(200, "text/plain",SSID );// 
 }
 
@@ -68,8 +66,6 @@ unsigned long previousMillis2 = 0;
 const long interval2 = 5000;
 
 //API variable
-const char* API_URL = "https://staging.revolvair.org/api/revolvair/stations/nicolasfelix/measures";
-const char* API_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiZGEyZTg0ZGVlYzAwZGM5MTA2ODMxMzY1OTM3YjgxOWMzNjliOGNjYTg5NTQ4NjlmMTQ3ZWI2MTllZGU0ZGI5MTcwMGIzMTI2NzZlNzRhZWQiLCJpYXQiOjE2MzIyNDgyNTIsIm5iZiI6MTYzMjI0ODI1MiwiZXhwIjoxNjYzNzg0MjUyLCJzdWIiOiIzNSIsInNjb3BlcyI6W119.HGqZ5HdAaFHq_GDdC4kzkwDURbc6KgFWxWIkrNI8gWExh_3JiwHvo2y8YI-kFbPWd_SS3luBOTY25kma6-ZHow3OeiH4RKPOKRHw1ZLf1tPscQfVU50og02oaDkkZlUwqS2MmpxbIgW5DAa_E6GiNGX6mfcLnT0Ehvngc6IfZcqrynrTkSRIUsMdgTGxLzqhxnNhxl9YCsm9KSvAws4uRGgKYt5lz48Rha1nl34mV-a3h8H2lMEkcYrgp0w5i-mqV1jxLTLUAJZJx_VpQEbHUHHya_MUMTZvizCKUR0wYnanzTLqdDRm8Pc9EQOyIcOB6La8GJvW-eTnZ7cN5_K3iTAX9OoWw1JNN2U78J5BWmHkoG0A3ekJ-A6tnWE7EeMXfeEhneOD7FlHrZeHmq5G8q4qFHQ6MgmmdrzcT5_Ufy6-AOcVOowDy6JieZeCze0IbB8dRenMDXDA9BCS6oj7BdKarzrDtPqyW1O9sPOYoyirloWskTAfvOQjWMUP_GEdw6hm5QOXBPOWdk6Ut__l5yJ1JhXtr1Iazoq6UkuJ69_mAmaqb52-bxX0E0r4DcGyqSEEA_DUHJdsXNniwmofMc9Vyl0ygvEJUzAuhPZV159cihKPIVcC13t32PzIYUsWo7LknUQnu6j8pKgo8AR7JHN5X1T5NhJo0e5ECWCWvA8";
 
 
 void handleADC(){
@@ -180,7 +176,7 @@ void setup(void) {
   Serial.println("DHT initialized");
   
   //Connect to wifi Network
-  WiFi.begin(ssid, password);     //Connect to your WiFi router
+  WiFi.begin(SSID, PASSWORD);     //Connect to your WiFi router
   Serial.println("");
 
   // Wait for connection
@@ -192,7 +188,7 @@ void setup(void) {
   //If connection successful show IP address in serial monitor
   Serial.println("");
   Serial.print("Connected to ");
-  Serial.println(ssid);
+  Serial.println(SSID);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());  //IP address assigned to your ESP
 
