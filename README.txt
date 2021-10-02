@@ -6,6 +6,10 @@ Lien vers le repo GitLab (la branche master sera évaluée)
 Liste des librairies utilisées
 -Arduino ESP32
 -SPIFF
+-FS
+-WiFi
+-WiFiClient
+-WebServer
 -ESPmDNS
 -PMS
 -Adafruit sensor

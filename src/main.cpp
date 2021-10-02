@@ -185,6 +185,12 @@ void setup(void) {
     Serial.print(".");
   }
 
+  //HotSpot starting
+  WiFi.softAP(AP_SSID, AP_PASSWORD);  
+  IPAddress myIP = WiFi.softAPIP();  
+  Serial.print("AP IP address: ");  
+  Serial.println(myIP);
+
   //If connection successful show IP address in serial monitor
   Serial.println("");
   Serial.print("Connected to ");
