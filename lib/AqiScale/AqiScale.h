@@ -4,7 +4,8 @@ class AqiScale
 {
 public:
     AqiScale();
-    char getAqi();
+    String getAqi( int pmsVal);
+    String getAqiLabel(int pmsVal);
     
 private:
     

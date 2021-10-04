@@ -22,6 +22,7 @@ FlashFileReader flashFileReader;
 PMSReader pmsReader;
 RGBLedManager rgbLedManager;
 RevolairAPI revolvairAPI = RevolairAPI( API_URL,API_TOKEN);
+TempReader tempReader;
 
 PMS pms(Serial2); //  R32 : IO16
 PMS::DATA data;
@@ -37,6 +38,14 @@ const boolean invert = true;     // set true if common anode, false if common ca
 uint8_t color = 0;          // a value from 0 to 255 representing the hue
 uint32_t R, G, B;           // the Red Green and Blue color components
 uint8_t brightness = 255;
+
+//waitThreeMins variables
+unsigned long previousMillis1 = 0; 
+const long interval1 = 180000;
+
+//waitFiveSeconds variables
+unsigned long previousMillis2 = 0; 
+const long interval2 = 5000;
 
 //See configuration.h file
 
@@ -59,24 +68,12 @@ void handleWifi() {
   server.send(302, "text/plain","");
 }
 void readTemp() {
-  String temp = String( dht.readTemperature());
-  String hum = String( dht.readHumidity());
-  server.send(200, "text/plain",temp + "," + hum );// trouver dans tempData.html facon de separer pour afficher correctement
+  tempReader.readTemp(&server,dht.readTemperature(),dht.readHumidity());
 }
 void readWifi() {
   
   server.send(200, "text/plain",SSID );// 
 }
-
-//waitThreeMins variables
-unsigned long previousMillis1 = 0; 
-const long interval1 = 180000;
-
-//waitFiveSeconds variables
-unsigned long previousMillis2 = 0; 
-const long interval2 = 5000;
-
-//API variable
 
 
 void readPMS(){
@@ -115,7 +112,6 @@ void setup(void) {
   Serial2.begin(9600); // Port de communication série avec le capteur PMS 
   Serial1.begin(9600);
   delay(2000);
-
 
   //Set up led
   ledcAttachPin(ledR, 1); // assign RGB led pins to channels
