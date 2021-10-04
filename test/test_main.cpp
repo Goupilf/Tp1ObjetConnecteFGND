@@ -1,7 +1,5 @@
 #include <Arduino.h>
 #include <unity.h>
-
-#include "colorTest.h"
 #include "aqiTest.h"
 
 void setup() {
@@ -10,9 +8,8 @@ void setup() {
     delay(2000);
 
     UNITY_BEGIN();
-
-    RUN_TEST(test_DEL_color_changes_when_pm25_value_increment_from_0_to_300);
-    RUN_TEST(aqiTest);
+    
+    RUN_TEST(getAQILabelFromPM25);
     
     UNITY_END();
 
