@@ -67,15 +67,13 @@ void handleWifi() {
   server.sendHeader("Location", "/WifiData.html",true);   //Redirect to our html web page
   server.send(302, "text/plain","");
 }
-void readTemp() {
-  tempReader.readTemp(&server,dht.readTemperature(),dht.readHumidity());
-}
 void readWifi() {
   
   server.send(200, "text/plain",SSID );// 
 }
-
-
+void readTemp() {
+  tempReader.readTemp(&server,dht.readTemperature(),dht.readHumidity());
+}
 void readPMS(){
   pmsReader.readPMS(&server,pm2p5value);
 }
