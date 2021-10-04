@@ -9,9 +9,20 @@
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <../lib/TempReader/TempReader.h>
+#include <../lib/FlashFileReader/FlashFileReader.h>
+#include <../lib/PMSReader/PMSReader.h>
+#include <../lib/RBGLedManager/RBGLedManager.h>
+#include <../lib/RevolairAPI/RevolairAPI.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <config.h>
+
+//char api_url = *API_URL;
+FlashFileReader flashFileReader;
+PMSReader pmsReader;
+RGBLedManager rgbLedManager;
+RevolairAPI revolvairAPI = RevolairAPI( API_URL,API_TOKEN);
+
 PMS pms(Serial2); //  R32 : IO16
 PMS::DATA data;
 
@@ -68,48 +79,17 @@ const long interval2 = 5000;
 //API variable
 
 
-void handleADC(){
-  int a = analogRead(A0);
-  a = map(a,0,1023,0,100);
-  String adc = String(a);
-  Serial.println(adc);
-  server.send(200, "text/plain",adc);
-}
 void readPMS(){
-  String pm2p5asString = String(pm2p5value);
-  // Serial.println(pm2p5asString);
-  server.send(200,"text/plain", pm2p5asString);
+  pmsReader.readPMS(&server,pm2p5value);
 }
 
 void handleRoot() {
   server.sendHeader("Location", "/index.html",true);   //Redirect to our html web page
   server.send(302, "text/plain","");
 }
-bool loadFromSpiffs(String path) {
-  String dataType = "text/plain";
-  if(path.endsWith("/")) path += "index.html";
-  if(path.endsWith(".src")) path = path.substring(0, path.lastIndexOf("."));
-   else if(path.endsWith(".html")) dataType = "text/html";
-  else if(path.endsWith(".htm")) dataType = "text/html";
-  else if(path.endsWith(".css")) dataType = "text/css";
-  else if(path.endsWith(".js")) dataType = "application/javascript";
-  else if(path.endsWith(".png")) dataType = "image/png";
-  else if(path.endsWith(".gif")) dataType = "image/gif";
-  else if(path.endsWith(".jpg")) dataType = "image/jpeg";
-  else if(path.endsWith(".ico")) dataType = "image/x-icon";
-  else if(path.endsWith(".xml")) dataType = "text/xml";
-  else if(path.endsWith(".pdf")) dataType = "application/pdf";
-  else if(path.endsWith(".zip")) dataType = "application/zip";
-  File dataFile = SPIFFS.open(path.c_str(), "r");
-  if (server.hasArg("download")) {
-  dataType = "application/octet-stream";
- }
- if (server.streamFile(dataFile, dataType) != dataFile.size()) { }
- dataFile.close();
- return true;
-}
+
 void handleWebRequests(){
-  if(loadFromSpiffs(server.uri())) { 
+  if(flashFileReader.loadFromSpiffs(server.uri(), &server)) { 
     return; 
   }
   String message = "File Not Found\n\n";
@@ -127,27 +107,7 @@ void handleWebRequests(){
   Serial.println(message);
 }
 
-void postJSON(String& encodedJSON) {
-    HTTPClient http;
-    http.begin(API_URL);
-    http.addHeader("Accept", "application/json");
-    http.addHeader("Content-Type", "application/json");
-    http.addHeader("Authorization", "Bearer " + String(API_TOKEN));
-    int httpCode = http.POST(encodedJSON);
-    String payload = http.getString();
-    Serial.println(httpCode);
-    Serial.println(payload);
-    http.end();
-}
 
-void sendPM25ValueToAPI(){
-  DynamicJsonDocument doc(1024);
-  doc["value"]  = pm2p5value;
-  doc["unit"]   = "pm25_raw";
-  String jsonPm25Package = "";
-  serializeJson(doc, jsonPm25Package);
-  postJSON(jsonPm25Package);  
-}
 
 void setup(void) {
   delay(1000);
@@ -200,7 +160,6 @@ void setup(void) {
 
   //Initialize Webserver
   server.on("/",handleRoot);
-  server.on("/getADC",handleADC); //Reads ADC function is called from out index.html
   server.on("/tempPage",handleTemp);
   server.on("/wifiPage",handleWifi);
   server.on("/readPMS",readPMS);
@@ -228,29 +187,14 @@ void loop(void) {
         float t = dht.readTemperature();
         Serial.println("Temperature:");
         Serial.println(t);
-        if(data.PM_AE_UG_2_5 <= 11){
-          ledcWrite(1, 0);
-          ledcWrite(2, 255); //GREEN
-          ledcWrite(3, 0);
-        } else if(data.PM_AE_UG_2_5 <= 34){
-          ledcWrite(1, 255); 
-          ledcWrite(2, 130); //YELLOW
-          ledcWrite(3, 0);
-        } else if(data.PM_AE_UG_2_5 <= 54){
-          ledcWrite(1, 255);
-          ledcWrite(2, 90); //Orange
-          ledcWrite(3, 0); 
-        } else{
-          ledcWrite(1, 255);
-          ledcWrite(2, 0); //RED
-          ledcWrite(3, 0);
-        }
+        rgbLedManager.handleLed(data.PM_AE_UG_2_5);
+        
       }
     }
   unsigned long currentMillis1 = millis();
   if (currentMillis1 - previousMillis1 >= interval1) {
     previousMillis1 = currentMillis1;
-    sendPM25ValueToAPI();
+    revolvairAPI.sendPM25ValueToAPI(pm2p5value);
   }
 }
 
