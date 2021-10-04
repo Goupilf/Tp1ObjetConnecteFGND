@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <unity.h>
 #include "aqiTest.h"
+#include <..\lib\AqiScale\AqiScale.h>
 
 void setup() {
     // NOTE!!! Wait for >2 secs
