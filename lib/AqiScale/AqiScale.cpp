@@ -1,5 +1,7 @@
 #include "AqiScale.h"
 
+AqiScale::AqiScale(){}
+
 String AqiScale::getAqi(int pmsVal){
  if (this.responseText <= 11) {
     return "La qualité de l’air est considérée comme satisfaisante et la pollution de l’air pose peu ou pas de risque.";
@@ -12,5 +14,19 @@ String AqiScale::getAqi(int pmsVal){
  }
  else if (this.responseText > 54) {
     return "Tout le monde peut commencer à ressentir des effets sur la santé; les membres de groupes sensibles peuvent subir des effets plus graves sur la santé.";
+ }
+}
+String AqiScale::getAqi(int pmsVal){
+ if (this.responseText <= 11) {
+    return "Bon";
+ }
+ else if (this.responseText > 11 && this.responseText <= 34) {
+    return "Acceptable";
+ }
+ else if (this.responseText > 34 && this.responseText <= 54) {
+    return "Mauvais pour les groupes sensibles";
+ }
+ else if (this.responseText > 54) {
+    return "Mauvais pour la santé";
  }
 }
